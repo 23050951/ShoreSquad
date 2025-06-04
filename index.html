@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Rally your crew, track weather, and hit the next beach cleanup with ShoreSquad - the dope map app for eco warriors!">
+    <meta name="keywords" content="beach cleanup, environmental, maps, weather, social, youth, eco-friendly">
+    <meta name="author" content="ShoreSquad Team">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="ShoreSquad - Beach Cleanup Map App">
+    <meta property="og:description" content="Rally your crew, track weather, and hit the next beach cleanup!">
+    <meta property="og:type" content="website">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#2196F3">
+    <link rel="manifest" href="manifest.json">
+    
+    <title>ShoreSquad - Rally Your Crew for Beach Cleanups</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/styles.css">
+      <!-- Preload critical resources -->
+    <link rel="preload" href="css/styles.css" as="style">
+    <link rel="preload" href="js/app.js" as="script">
+    
+    <!-- Leaflet CSS for maps - load async -->
+    <link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"></noscript>
+</head>
+<body>
+    <!-- Skip to main content for accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar" role="navigation" aria-label="Main navigation">
+            <div class="nav-container">
+                <div class="brand">
+                    <h1 class="logo">🏖️ ShoreSquad</h1>
+                </div>
+                <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                    <span class="hamburger"></span>
+                </button>
+                <ul class="nav-menu" role="menubar">
+                    <li role="none"><a href="#home" role="menuitem">Home</a></li>
+                    <li role="none"><a href="#map" role="menuitem">Map</a></li>
+                    <li role="none"><a href="#crew" role="menuitem">My Crew</a></li>
+                    <li role="none"><a href="#events" role="menuitem">Events</a></li>
+                    <li role="none"><a href="#weather" role="menuitem">Weather</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content">
+        <!-- Hero Section -->
+        <section class="hero" id="home">
+            <div class="hero-content">
+                <h2 class="hero-title">Rally Your Crew for Beach Cleanups! 🌊</h2>
+                <p class="hero-subtitle">Track weather, find events, and make eco-action fun and connected</p>
+                <div class="hero-actions">
+                    <button class="btn btn-primary" id="get-started-btn">Get Started</button>
+                    <button class="btn btn-secondary" id="learn-more-btn">Learn More</button>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="floating-cards">
+                    <div class="card weather-card">
+                        <span class="card-emoji">☀️</span>
+                        <span class="card-text">Perfect cleanup weather!</span>
+                    </div>
+                    <div class="card crew-card">
+                        <span class="card-emoji">👥</span>
+                        <span class="card-text">12 crew members ready</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features" id="features">
+            <div class="container">
+                <h2 class="section-title">Why ShoreSquad Rocks</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🗺️</div>
+                        <h3>Smart Maps</h3>
+                        <p>Find beaches that need cleanup with our interactive map and crowd-sourced data</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🌤️</div>
+                        <h3>Weather Tracking</h3>
+                        <p>Never get caught in the rain! Real-time weather updates for perfect cleanup days</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">👥</div>
+                        <h3>Crew Building</h3>
+                        <p>Rally your friends, meet new eco-warriors, and make cleanup a social experience</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Map Section -->
+        <section class="map-section" id="map">
+            <div class="container">
+                <h2 class="section-title">Find Your Next Cleanup Spot</h2>
+                <div class="map-container">
+                    <div id="cleanup-map" class="map" role="application" aria-label="Interactive map showing beach cleanup locations"></div>
+                    <div class="map-controls">
+                        <button class="btn btn-primary" id="find-location-btn">📍 Find My Location</button>
+                        <button class="btn btn-secondary" id="add-spot-btn">➕ Add Cleanup Spot</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Events Section -->
+        <section class="events-section" id="events">
+            <div class="container">
+                <h2 class="section-title">Upcoming Cleanups</h2>
+                <div class="events-grid" id="events-list">
+                    <!-- Events will be populated by JavaScript -->
+                </div>
+                <button class="btn btn-primary" id="create-event-btn">Create New Event</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>ShoreSquad</h3>
+                    <p>Making beach cleanup fun, social, and effective for the next generation of eco-warriors.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#map">Map</a></li>
+                        <li><a href="#events">Events</a></li>
+                        <li><a href="#crew">My Crew</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Connect</h4>
+                    <div class="social-links">
+                        <a href="#" aria-label="Follow us on Instagram">📷</a>
+                        <a href="#" aria-label="Follow us on TikTok">🎵</a>
+                        <a href="#" aria-label="Join our Discord">💬</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 ShoreSquad. Making waves for a cleaner tomorrow.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Loading indicator -->
+    <div id="loading-indicator" class="loading-indicator" aria-hidden="true">
+        <div class="spinner"></div>
+        <p>Loading awesome content...</p>
+    </div>    <!-- Scripts - Load async for better performance -->
+    <script async src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script defer src="js/app.js"></script>
+    
+    <!-- Initialize app only after DOM is loaded -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait for Leaflet to load before initializing
+            function initApp() {
+                if (typeof L !== 'undefined') {
+                    window.shoreSquadApp = new ShoreSquadApp();
+                } else {
+                    setTimeout(initApp, 100);
+                }
+            }
+            initApp();
+        });
+    </script>
+</body>
+</html>
