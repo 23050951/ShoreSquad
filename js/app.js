@@ -233,21 +233,103 @@ class ShoreSquadApp {
             // Show loading state
             this.showWeatherLoading();
             
-            // Fetch both current and 4-day forecast data
-            const [currentWeather, forecast4Day] = await Promise.all([
+            // Try to fetch both current and 4-day forecast data with faster error handling
+            const results = await Promise.allSettled([
                 this.fetchCurrentWeather(),
                 this.fetch4DayForecast()
             ]);
             
+            const [currentResult, forecastResult] = results;
+            
+            // Check if we got at least one successful result
+            if (currentResult.status === 'rejected' && forecastResult.status === 'rejected') {
+                throw new Error('Both weather services unavailable');
+            }
+            
+            // Use fallback data if one API fails
+            const currentWeather = currentResult.status === 'fulfilled' 
+                ? currentResult.value 
+                : this.getFallbackCurrentWeather();
+                
+            const forecast4Day = forecastResult.status === 'fulfilled' 
+                ? forecastResult.value 
+                : this.getFallbackForecast();
+            
             this.updateWeatherDisplay({ current: currentWeather, forecast: forecast4Day });
+            
+            // Show warning if using fallback data
+            if (currentResult.status === 'rejected' || forecastResult.status === 'rejected') {
+                this.showMessage('Some weather data may be incomplete. Please try refreshing.', 'warning');
+            }
+            
         } catch (error) {
             console.error('Failed to load weather:', error);
-            this.showMessage('Weather data unavailable. Please try again later.', 'error');
-            this.hideWeatherLoading();
+            this.showWeatherError();
         }
-    }    async fetchCurrentWeather() {
+    }
+
+    getFallbackCurrentWeather() {
+        return {
+            temperature: {
+                current: 28,
+                low: 25,
+                high: 32
+            },
+            condition: 'Partly Cloudy',
+            humidity: {
+                low: 60,
+                high: 90
+            },
+            wind: {
+                speed: {
+                    low: 10,
+                    high: 20
+                },
+                direction: 'SW'
+            },
+            updateTime: new Date()
+        };
+    }
+
+    getFallbackForecast() {
+        const today = new Date();
+        return Array.from({length: 4}, (_, i) => {
+            const date = new Date(today);
+            date.setDate(date.getDate() + i + 1);
+            return {
+                date,
+                dateString: date.toISOString().split('T')[0],
+                forecast: 'Partly Cloudy',
+                temperature: { low: 24 + i, high: 32 - i },
+                humidity: { low: 55, high: 90 },
+                wind: { speed: { low: 10, high: 20 }, direction: 'SW' }
+            };
+        });
+    }
+
+    showWeatherError() {
+        const weatherSection = document.querySelector('.weather-widget');
+        if (weatherSection) {
+            weatherSection.innerHTML = `
+                <div class="weather-error">
+                    <h3>🌊 Weather Service Unavailable</h3>
+                    <p>Unable to load Singapore weather data at the moment.</p>
+                    <button class="btn btn-primary" onclick="app.initializeWeather()">
+                        Try Again
+                    </button>
+                </div>
+            `;
+        }
+    }async fetchCurrentWeather() {
         try {
-            const response = await fetch('https://api.data.gov.sg/v1/environment/24-hour-weather-forecast');
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+            
+            const response = await fetch('https://api.data.gov.sg/v1/environment/24-hour-weather-forecast', {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            
             if (!response.ok) throw new Error('Failed to fetch current weather');
             
             const data = await response.json();
@@ -275,6 +357,9 @@ class ShoreSquadApp {
                 updateTime: new Date(currentData.update_timestamp)
             };
         } catch (error) {
+            if (error.name === 'AbortError') {
+                throw new Error('Weather request timed out');
+            }
             console.error('Error fetching current weather:', error);
             throw error;
         }
@@ -282,7 +367,14 @@ class ShoreSquadApp {
 
     async fetch4DayForecast() {
         try {
-            const response = await fetch('https://api.data.gov.sg/v1/environment/4-day-weather-forecast');
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+            
+            const response = await fetch('https://api.data.gov.sg/v1/environment/4-day-weather-forecast', {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            
             if (!response.ok) throw new Error('Failed to fetch 4-day forecast');
             
             const data = await response.json();
@@ -295,10 +387,13 @@ class ShoreSquadApp {
                 wind: day.wind
             }));
         } catch (error) {
+            if (error.name === 'AbortError') {
+                throw new Error('Forecast request timed out');
+            }
             console.error('Error fetching 4-day forecast:', error);
             throw error;
         }
-    }    updateWeatherDisplay({ current, forecast }) {
+    }updateWeatherDisplay({ current, forecast }) {
         const weatherSection = document.querySelector('.weather-widget');
         if (!weatherSection) return;
 

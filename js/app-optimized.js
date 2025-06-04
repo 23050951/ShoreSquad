@@ -233,19 +233,40 @@ class ShoreSquadApp {
             // Show loading state
             this.showWeatherLoading();
             
-            // Fetch both current and 4-day forecast data
-            const [currentWeather, forecast4Day] = await Promise.all([
+            // Try to fetch both current and 4-day forecast data with faster error handling
+            const results = await Promise.allSettled([
                 this.fetchCurrentWeather(),
                 this.fetch4DayForecast()
             ]);
             
+            const [currentResult, forecastResult] = results;
+            
+            // Check if we got at least one successful result
+            if (currentResult.status === 'rejected' && forecastResult.status === 'rejected') {
+                throw new Error('Both weather services unavailable');
+            }
+            
+            // Use fallback data if one API fails
+            const currentWeather = currentResult.status === 'fulfilled' 
+                ? currentResult.value 
+                : this.getFallbackCurrentWeather();
+                
+            const forecast4Day = forecastResult.status === 'fulfilled' 
+                ? forecastResult.value 
+                : this.getFallbackForecast();
+            
             this.updateWeatherDisplay({ current: currentWeather, forecast: forecast4Day });
+            
+            // Show warning if using fallback data
+            if (currentResult.status === 'rejected' || forecastResult.status === 'rejected') {
+                this.showMessage('Some weather data may be incomplete. Please try refreshing.', 'warning');
+            }
+            
         } catch (error) {
             console.error('Failed to load weather:', error);
-            this.showMessage('Weather data unavailable. Please try again later.', 'error');
-            this.hideWeatherLoading();
+            this.showWeatherError();
         }
-    }    async fetchCurrentWeather() {
+    }async fetchCurrentWeather() {
         try {
             const response = await fetch('https://api.data.gov.sg/v1/environment/24-hour-weather-forecast');
             if (!response.ok) throw new Error('Failed to fetch current weather');
