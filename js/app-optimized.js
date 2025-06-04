@@ -228,44 +228,195 @@ class ShoreSquadApp {
                     </div>
                 `);
         });
-    }
-
-    async initializeWeather() {
+    }    async initializeWeather() {
         try {
-            // Simulate weather API call
-            const weatherData = await this.fetchWeatherData();
-            this.updateWeatherDisplay(weatherData);
+            // Show loading state
+            this.showWeatherLoading();
+            
+            // Fetch both current and 4-day forecast data
+            const [currentWeather, forecast4Day] = await Promise.all([
+                this.fetchCurrentWeather(),
+                this.fetch4DayForecast()
+            ]);
+            
+            this.updateWeatherDisplay({ current: currentWeather, forecast: forecast4Day });
         } catch (error) {
             console.error('Failed to load weather:', error);
             this.showMessage('Weather data unavailable. Please try again later.', 'error');
+            this.hideWeatherLoading();
         }
-    }    async fetchWeatherData() {
-        // Simulate API call with realistic data
-        return new Promise(resolve => {
-            setTimeout(() => {
-                resolve({
-                    temperature: Math.floor(Math.random() * 10 + 18),
-                    condition: ['Sunny', 'Partly Cloudy', 'Overcast'][Math.floor(Math.random() * 3)],
-                    windSpeed: Math.floor(Math.random() * 16 + 8),
-                    humidity: Math.floor(Math.random() * 30 + 50)
-                });
-            }, 500);
-        });
-    }    updateWeatherDisplay(weatherData) {
+    }    async fetchCurrentWeather() {
+        try {
+            const response = await fetch('https://api.data.gov.sg/v1/environment/24-hour-weather-forecast');
+            if (!response.ok) throw new Error('Failed to fetch current weather');
+            
+            const data = await response.json();
+            const currentData = data.items[0];
+            
+            return {
+                temperature: {
+                    current: Math.round((currentData.general.temperature.low + currentData.general.temperature.high) / 2),
+                    low: currentData.general.temperature.low,
+                    high: currentData.general.temperature.high
+                },
+                condition: currentData.general.forecast,
+                humidity: {
+                    low: currentData.general.relative_humidity.low,
+                    high: currentData.general.relative_humidity.high
+                },
+                wind: {
+                    speed: {
+                        low: currentData.general.wind.speed.low,
+                        high: currentData.general.wind.speed.high
+                    },
+                    direction: currentData.general.wind.direction
+                },
+                periods: currentData.periods,
+                updateTime: new Date(currentData.update_timestamp)
+            };
+        } catch (error) {
+            console.error('Error fetching current weather:', error);
+            throw error;
+        }
+    }
+
+    async fetch4DayForecast() {
+        try {
+            const response = await fetch('https://api.data.gov.sg/v1/environment/4-day-weather-forecast');
+            if (!response.ok) throw new Error('Failed to fetch 4-day forecast');
+            
+            const data = await response.json();
+            return data.items[0].forecasts.map(day => ({
+                date: new Date(day.date),
+                dateString: day.date,
+                forecast: day.forecast,
+                temperature: day.temperature,
+                humidity: day.relative_humidity,
+                wind: day.wind
+            }));
+        } catch (error) {
+            console.error('Error fetching 4-day forecast:', error);
+            throw error;
+        }    }
+
+    updateWeatherDisplay({ current, forecast }) {
+        const weatherSection = document.querySelector('.weather-widget');
+        if (!weatherSection) return;
+
+        // Helper function to get weather emoji
+        const getWeatherEmoji = (condition) => {
+            const conditionLower = condition.toLowerCase();
+            if (conditionLower.includes('thunder')) return '⛈️';
+            if (conditionLower.includes('rain') || conditionLower.includes('shower')) return '🌧️';
+            if (conditionLower.includes('cloudy')) return '☁️';
+            if (conditionLower.includes('partly cloudy')) return '⛅';
+            if (conditionLower.includes('sunny') || conditionLower.includes('clear')) return '☀️';
+            return '🌤️';
+        };
+
+        const formatDate = (date) => {
+            return date.toLocaleDateString('en-SG', { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        };
+
+        weatherSection.innerHTML = `
+            <div class="weather-container">
+                <div class="weather-header">
+                    <h3>🌊 Singapore Weather Forecast</h3>
+                    <p class="update-time">Updated: ${current.updateTime.toLocaleTimeString('en-SG', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    })}</p>
+                </div>
+                
+                <div class="current-weather">
+                    <div class="current-main">
+                        <div class="temp-display">
+                            <span class="current-temp">${current.temperature.current}°C</span>
+                            <span class="temp-range">${current.temperature.low}° - ${current.temperature.high}°</span>
+                        </div>
+                        <div class="condition-display">
+                            <span class="weather-emoji">${getWeatherEmoji(current.condition)}</span>
+                            <span class="condition-text">${current.condition}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="weather-details">
+                        <div class="detail-item">
+                            <span class="detail-label">💨 Wind</span>
+                            <span class="detail-value">${current.wind.speed.low}-${current.wind.speed.high} km/h ${current.wind.direction}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">💧 Humidity</span>
+                            <span class="detail-value">${current.humidity.low}-${current.humidity.high}%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="forecast-section">
+                    <h4>4-Day Forecast</h4>
+                    <div class="forecast-grid">
+                        ${forecast.map(day => `
+                            <div class="forecast-card">
+                                <div class="forecast-date">${formatDate(day.date)}</div>
+                                <div class="forecast-emoji">${getWeatherEmoji(day.forecast)}</div>
+                                <div class="forecast-temps">
+                                    <span class="high-temp">${day.temperature.high}°</span>
+                                    <span class="low-temp">${day.temperature.low}°</span>
+                                </div>
+                                <div class="forecast-condition">${day.forecast}</div>
+                                <div class="forecast-wind">💨 ${day.wind.speed.low}-${day.wind.speed.high} km/h</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="beach-recommendation">
+                    <h4>🏖️ Beach Cleanup Recommendation</h4>
+                    <p class="recommendation-text">
+                        ${this.getBeachRecommendation(current, forecast)}
+                    </p>
+                </div>
+            </div>
+        `;
+
+        this.hideWeatherLoading();
+    }
+
+    getBeachRecommendation(current, forecast) {
+        const currentCondition = current.condition.toLowerCase();
+        const todayForecast = forecast[0];
+        
+        if (currentCondition.includes('thunder') || currentCondition.includes('heavy rain')) {
+            return "⚠️ Not ideal for beach cleanup due to thunderstorms. Stay safe and wait for better weather!";
+        } else if (currentCondition.includes('rain') || currentCondition.includes('shower')) {
+            return "🌧️ Light rain may make cleanup challenging. Consider rescheduling or bringing waterproof gear.";
+        } else if (current.wind.speed.high > 25) {
+            return "💨 Strong winds today. Great for cleanup but bring secure containers for collected trash.";
+        } else if (currentCondition.includes('sunny') || currentCondition.includes('partly cloudy')) {
+            return "☀️ Perfect weather for beach cleanup! Don't forget sunscreen and plenty of water.";
+        } else {
+            return "🌤️ Good conditions for beach cleanup. Check the 4-day forecast to plan your next cleanup event.";
+        }
+    }
+
+    showWeatherLoading() {
         const weatherSection = document.querySelector('.weather-widget');
         if (weatherSection) {
             weatherSection.innerHTML = `
-                <h3>Current Weather</h3>
-                <div class="weather-info">
-                    <div class="temp">${weatherData.temperature}°C</div>
-                    <div class="condition">${weatherData.condition}</div>
-                    <div class="details">
-                        <span>Wind: ${weatherData.windSpeed}km/h</span>
-                        <span>Humidity: ${weatherData.humidity}%</span>
-                    </div>
+                <div class="weather-loading">
+                    <div class="loading-spinner"></div>
+                    <p>Loading Singapore weather data...</p>
                 </div>
             `;
         }
+    }
+
+    hideWeatherLoading() {
+        // Loading state is replaced by weather content
     }
 
     showWeatherInfo() {
