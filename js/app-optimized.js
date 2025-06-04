@@ -239,32 +239,28 @@ class ShoreSquadApp {
             console.error('Failed to load weather:', error);
             this.showMessage('Weather data unavailable. Please try again later.', 'error');
         }
-    }
-
-    async fetchWeatherData() {
+    }    async fetchWeatherData() {
         // Simulate API call with realistic data
         return new Promise(resolve => {
             setTimeout(() => {
                 resolve({
-                    temperature: Math.floor(Math.random() * 15 + 65),
+                    temperature: Math.floor(Math.random() * 10 + 18),
                     condition: ['Sunny', 'Partly Cloudy', 'Overcast'][Math.floor(Math.random() * 3)],
-                    windSpeed: Math.floor(Math.random() * 10 + 5),
+                    windSpeed: Math.floor(Math.random() * 16 + 8),
                     humidity: Math.floor(Math.random() * 30 + 50)
                 });
             }, 500);
         });
-    }
-
-    updateWeatherDisplay(weatherData) {
+    }    updateWeatherDisplay(weatherData) {
         const weatherSection = document.querySelector('.weather-widget');
         if (weatherSection) {
             weatherSection.innerHTML = `
                 <h3>Current Weather</h3>
                 <div class="weather-info">
-                    <div class="temp">${weatherData.temperature}°F</div>
+                    <div class="temp">${weatherData.temperature}°C</div>
                     <div class="condition">${weatherData.condition}</div>
                     <div class="details">
-                        <span>Wind: ${weatherData.windSpeed}mph</span>
+                        <span>Wind: ${weatherData.windSpeed}km/h</span>
                         <span>Humidity: ${weatherData.humidity}%</span>
                     </div>
                 </div>
