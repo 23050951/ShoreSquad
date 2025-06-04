@@ -1,0 +1,29 @@
+{
+  "name": "shoresquad",
+  "version": "1.0.0",
+  "description": "Rally your crew, track weather, and hit the next beach cleanup with our dope map app!",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server .",
+    "dev": "npx live-server --port=3000",
+    "lint": "echo \"Linting not configured\" && exit 0"
+  },
+  "keywords": [
+    "beach",
+    "cleanup",
+    "environment",
+    "social",
+    "maps",
+    "weather",
+    "eco-friendly"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "."
+  }
+}
