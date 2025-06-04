@@ -2,6 +2,8 @@
 
 **Rally your crew, track weather, and hit the next beach cleanup with our dope map app!**
 
+🌐 **Live Demo**: [https://23050951.github.io/ShoreSquad](https://23050951.github.io/ShoreSquad)
+
 ## 🌊 About ShoreSquad
 
 ShoreSquad creates value by mobilizing young people to clean beaches, using weather and maps for easy planning and social features to make eco-action fun and connected.
