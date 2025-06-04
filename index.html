@@ -44,9 +44,9 @@
                 </div>
                 <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
                     <span class="hamburger"></span>
-                </button>
-                <ul class="nav-menu" role="menubar">
+                </button>                <ul class="nav-menu" role="menubar">
                     <li role="none"><a href="#home" role="menuitem">Home</a></li>
+                    <li role="none"><a href="#next-cleanup" role="menuitem">Next Cleanup</a></li>
                     <li role="none"><a href="#map" role="menuitem">Map</a></li>
                     <li role="none"><a href="#crew" role="menuitem">My Crew</a></li>
                     <li role="none"><a href="#events" role="menuitem">Events</a></li>
@@ -104,6 +104,33 @@
                     </div>
                 </div>
             </div>
+        </section>        <!-- Next Cleanup Section -->
+        <section class="next-cleanup-section" id="next-cleanup">
+            <div class="container">
+                <h2 class="section-title">🏖️ Next Cleanup: Pasir Ris Beach</h2>
+                <div class="cleanup-info">
+                    <div class="cleanup-details">
+                        <h3>Join Us for Our Next Beach Cleanup!</h3>
+                        <p><strong>📍 Location:</strong> Pasir Ris Beach, Singapore</p>
+                        <p><strong>🗓️ When:</strong> This Weekend</p>
+                        <p><strong>⏰ Time:</strong> 9:00 AM - 12:00 PM</p>
+                        <button class="btn btn-primary cta-button">Join This Cleanup</button>
+                    </div>
+                    <div class="map-container">
+                        <iframe 
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.4793889982916!2d103.95319231475321!3d1.3814969986500942!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMcKwMjInNTIuMiJOIDEwM8KwNTcnMjAuMSJF!5e0!3m2!1sen!2ssg!4v1620000000000!5m2!1sen!2ssg&markers=color:red%7Clabel:Next%20Cleanup%7C1.381497,103.955574"
+                            width="100%" 
+                            height="300" 
+                            style="border:0;" 
+                            allowfullscreen="" 
+                            loading="lazy" 
+                            referrerpolicy="no-referrer-when-downgrade"
+                            title="Next Cleanup Location - Pasir Ris Beach"
+                            aria-label="Map showing next cleanup location at Pasir Ris Beach">
+                        </iframe>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- Map Section -->
@@ -111,10 +138,10 @@
             <div class="container">
                 <h2 class="section-title">Find Your Next Cleanup Spot</h2>
                 <div class="map-container">
-                    <div id="cleanup-map" class="map" role="application" aria-label="Interactive map showing beach cleanup locations"></div>
+                    <div id="map-container" class="map" role="application" aria-label="Interactive map showing beach cleanup locations"></div>
                     <div class="map-controls">
-                        <button class="btn btn-primary" id="find-location-btn">📍 Find My Location</button>
-                        <button class="btn btn-secondary" id="add-spot-btn">➕ Add Cleanup Spot</button>
+                        <button class="btn btn-primary" data-action="check-weather">🌤️ Check Weather</button>
+                        <button class="btn btn-secondary" data-action="suggest-spot">➕ Suggest Spot</button>
                     </div>
                 </div>
             </div>
